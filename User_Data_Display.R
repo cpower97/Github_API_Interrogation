@@ -37,3 +37,6 @@ gitDF[gitDF$full_name == "jtleek/datasharing", "created_at"]
 
 userData = fromJSON("https://api.github.com/users/cpower97")
 userData
+userData$login
+userData$followers
+userData$public_repos
