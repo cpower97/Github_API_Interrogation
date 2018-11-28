@@ -58,13 +58,14 @@ library(plotly)
 Sys.setenv("plotly_username"="cpower97")
 Sys.setenv("plotly_api_key"="cvbGEJbplQFjKFArdobz")
 
+#Extracting information about user's repositories and representing it as a data frame
+userRepos <- content(GET("https://api.github.com/users/",mbostock,"/repos?per_page=100;",gtoken))
+
 #Creation of function to see language of repositories for given user
 
 getLanguages() <- function(user)
   {
-  
-  #Extracting information about user's repositories and representing it as a data frame
-  userRepos <- content(GET("https://api.github.com/users/",mbostock,"/repos?per_page=100;",gtoken))
+
   repoInfo <- content(reposDF)
   languageData <- data.frame()
   numOfRepos <- length(repoInfo)
