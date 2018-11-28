@@ -6,6 +6,7 @@ library(jsonlite)
 library(httpuv)
 #install.packages("httr")
 library(httr)
+#install.packages(xml2)
 
 # Can be github, linkedin etc depending on application
 oauth_endpoints("github")
@@ -21,6 +22,7 @@ github_token <- oauth2.0_token(oauth_endpoints("github"), myapp)
 # Use API
 gtoken <- config(token = github_token)
 req <- GET("https://api.github.com/users/jtleek/repos", gtoken)
+req
 
 # Take action on http error
 stop_for_status(req)
@@ -40,3 +42,84 @@ userData
 userData$login
 userData$followers
 userData$public_repos
+data = toJSON(userData,pretty = T)
+data
+
+#Retrieving info about my followers
+userFollowers = fromJSON("https://api.github.com/users/cpower97/followers")
+userFollowers
+
+
+#Beginning of visualisations
+
+#Installation and creation of plotly account for data visualisation 
+#install.packages("plotly")
+library(plotly)
+Sys.setenv("plotly_username"="cpower97")
+Sys.setenv("plotly_api_key"="cvbGEJbplQFjKFArdobz")
+
+#Creation of function to see language of repositories for given user
+
+getLanguages() <- function(user)
+  {
+  
+  #Extracting information about user's repositories and representing it as a data frame
+  userRepos <- content(GET("https://api.github.com/users/",mbostock,"/repos?per_page=100;",gtoken))
+  repoInfo <- content(reposDF)
+  languageData <- data.frame()
+  numOfRepos <- length(repoInfo)
+  
+  for(i in 1:numOfRepos)
+  {
+    repoLanguage <- repoInfo[i]$language
+    repoName <- repoInfo[i]$name
+    
+    if(repoLanguage == null)
+    {
+      currentLanguageData <- data.fram(repo = repoName, language = "N/A")
+    }
+    else
+    {
+      currentLanguageData <- data.fram(repo = repoName, language = repoLanguage)
+    }
+    
+    languageData <- rbind(languageData, currentLanguageData)
+  }
+  
+}
+
+#Interrogating and visualisng data based on user mbostock
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
