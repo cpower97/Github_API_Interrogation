@@ -46,7 +46,7 @@ data = toJSON(userData,pretty = T)
 data
 
 #Retrieving info about my followers
-userFollowers = fromJSON("https://api.github.com/users/cpower97/followers")
+userFollowers = fromJSON("https://api.github.com/users/cpower97")
 userFollowers
 
 
@@ -87,8 +87,8 @@ Sys.setenv("plotly_api_key"="cvbGEJbplQFjKFArdobz")
   
   return(languageData)
   
-}
-
+  }
+  
 #Function to visualise bar chart of languages used in repos of Github User
 
 barChartOfLanguages <- function(user)
@@ -106,26 +106,60 @@ return(p)
 #Visualisation of Languages used in repos of user mbostock
 mbostockLanguages <- barChartOfLanguages("mbostock")
 chart_link1 = api_create(mbostockLanguages, filename="mbostockLanguages")
-chart_link1
+#chart_link1
 
 #Visualisation of Languages used in repos of user phadej
 phadejLanguages <- barChartOfLanguages("phadej")
 chart_link2 = api_create(phadejLanguages, filename="phadejLanguages")
-chart_link2
+#chart_link2
 
+#Function to get the companies of a Github users followers
 
+getCompanies <- function(user)
+{
+  followerInfo <- content(GET(paste0("https://api.github.com/users/phadej/followers"),gtoken))
+  followerInfo[i]
+  companyData <- data.frame()
+  numOfUsers <- length(followerInfo)
+  
+  for(i in 1:numOfUsers)
+  {
+    userLogin <- followerInfo[[i]]$login
+    userInfo <- content(GET(paste0("https://api.github.com/users/",userLogin)))
+    
+    if(is.null(userInfo$company))
+      {
+        currentCompanyData <- data.frame(login = userLogin, company = "Not Specified" )
+    }
+    else
+    {
+      currentCompanyData <- data.frame(login = userLogin, company = userInfo$company )
+    }
+    companyData <- rbind(companyData, currentCompanyData)
+  }
+  return(companyData)
+}
+  
 
+#c <- getCompanies("phadej")
+#c
 
+#Function to visualize the company's of the followers of a particular user
 
+visualizeCompanies <- function(user)
+{
+  
+  z <- getCompanies(user)
+  x <- data.frame(table(z$company))
+  
+  pie <- plot_ly(data =x, labels = ~Var1, values = ~Freq, type = 'pie') %>%
+    layout(title = paste("Companies of", user,"'s Followers"),
+           xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+           yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+  return(pie)
+}
 
-
-
-
-
-
-
-
-
+visualizeCompanies("phadej")
 
 
 
