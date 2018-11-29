@@ -117,26 +117,27 @@ chart_link2 = api_create(phadejLanguages, filename="phadejLanguages")
 
 getCompanies <- function(user)
 {
-  followerInfo <- content(GET(paste0("https://api.github.com/users/phadej/followers"),gtoken))
-  followerInfo[i]
+  followerInfo <- content(GET(paste0("https://api.github.com/users/",user,"/followers?per_page=100;"),gtoken))
   companyData <- data.frame()
   numOfUsers <- length(followerInfo)
   
   for(i in 1:numOfUsers)
   {
     userLogin <- followerInfo[[i]]$login
-    userInfo <- content(GET(paste0("https://api.github.com/users/",userLogin)))
+    userInfo <- content(GET(paste0("https://api.github.com/users/",userLogin),gtoken))
     
     if(is.null(userInfo$company))
-      {
-        currentCompanyData <- data.frame(login = userLogin, company = "Not Specified" )
+    {
+      next
     }
-    else
+    else 
     {
       currentCompanyData <- data.frame(login = userLogin, company = userInfo$company )
+      companyData <- rbind(companyData, currentCompanyData)
     }
-    companyData <- rbind(companyData, currentCompanyData)
+    
   }
+    
   return(companyData)
 }
   
@@ -152,20 +153,24 @@ visualizeCompanies <- function(user)
   z <- getCompanies(user)
   x <- data.frame(table(z$company))
   
-  pie <- plot_ly(data =x, labels = ~Var1, values = ~Freq, type = 'pie') %>%
+  p <- plot_ly(data =x, labels = ~Var1, values = ~Freq, type = 'pie') %>%
     layout(title = paste("Companies of", user,"'s Followers"),
            xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
            yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
-  return(pie)
+  return(p)
 }
 
-visualizeCompanies("phadej")
+mbostockFollowerCompanies <- visualizeCompanies("mbostock")
+chart_link3 = api_create(mbostockFollowerCompanies, filename="mbostockFollowerCompanies")
+chart_link3
 
+phadejFollowerCompanies <- visualizeCompanies("phadej")
+chart_link4 = api_create(phadejFollowerCompanies, filename="phadejFollowerCompanies")
+chart_link4
 
-
-
-
-
+BcRikkoFollowerCompanies <- visualizeCompanies("BcRikko")
+chart_link5 = api_create(BcRikkoFollowerCompanies, filename="BcRikkoFollowerCompanies")
+chart_link5
 
 
 
