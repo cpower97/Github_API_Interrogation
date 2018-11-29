@@ -58,47 +58,60 @@ library(plotly)
 Sys.setenv("plotly_username"="cpower97")
 Sys.setenv("plotly_api_key"="cvbGEJbplQFjKFArdobz")
 
-#Extracting information about user's repositories and representing it as a data frame
-userRepos <- content(GET("https://api.github.com/users/",mbostock,"/repos?per_page=100;",gtoken))
 
 #Creation of function to see language of repositories for given user
 
-getLanguages() <- function(user)
+  getLanguages <- function(user)
   {
 
-  repoInfo <- content(reposDF)
+  #Extracting information about user's repositories and representing it as a data frame
+  repoInfo  <- content(GET(paste0("https://api.github.com/users/",user,"/repos?per_page=100;"),gtoken))
   languageData <- data.frame()
   numOfRepos <- length(repoInfo)
   
   for(i in 1:numOfRepos)
   {
-    repoLanguage <- repoInfo[i]$language
-    repoName <- repoInfo[i]$name
+    repoLanguage <- repoInfo[[i]]$language
+    repoName <- repoInfo[[i]]$name
     
-    if(repoLanguage == null)
+    if(is.null(repoLanguage))
     {
-      currentLanguageData <- data.fram(repo = repoName, language = "N/A")
+      currentLanguageData <- data.frame(repo = repoName, language = "Unknown")
     }
     else
     {
-      currentLanguageData <- data.fram(repo = repoName, language = repoLanguage)
+      currentLanguageData <- data.frame(repo = repoName, language = repoLanguage)
     }
-    
     languageData <- rbind(languageData, currentLanguageData)
   }
   
+  return(languageData)
+  
 }
 
-#Interrogating and visualisng data based on user mbostock
+#Function to visualise bar chart of languages used in repos of Github User
 
+barChartOfLanguages <- function(user)
+{
+z <- getLanguages(user)
+x <- data.frame(table(z$language))
 
+p <- plot_ly(data=x, x = ~Var1, y = ~Freq, type = 'bar', name = 'Repo Languages') %>%
+  layout(yaxis = list(title = 'Repository Count'), xaxis = list(title='Language'),
+         title = paste("Languages Used in Repositories of Github User",user))
 
+return(p)
+}
 
+#Visualisation of Languages used in repos of user mbostock
+mbostockLanguages <- barChartOfLanguages("mbostock")
+chart_link1 = api_create(mbostockLanguages, filename="mbostockLanguages")
+chart_link1
 
-
-
-
-
+#Visualisation of Languages used in repos of user phadej
+phadejLanguages <- barChartOfLanguages("phadej")
+chart_link2 = api_create(phadejLanguages, filename="phadejLanguages")
+chart_link2
 
 
 
