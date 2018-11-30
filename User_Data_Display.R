@@ -203,7 +203,7 @@ getFollowersAndRepos <- function(user)
   return(userData)
 }
 
-
+#Function to plot number of followers against number of repos
 plotFollowersAgainstRepos <- function(user)
 {
 z <-getFollowersAndRepos(user)
@@ -225,3 +225,54 @@ chart_link6 = api_create(phadejFollowersAgainstRepos , filename="phadejFollowers
 mbostockFollowersAgainstRepos <- plotFollowersAgainstRepos("mbostock")
 chart_link7 = api_create(mbostockFollowersAgainstRepos , filename="mbostockFollowersAgainstRepos ")
 #chart_link7
+
+#Function to get the number of follower and number of people being followed by a user's followers
+getFollowersAndFollowing <- function(user)
+{
+  followerInfo <- content(GET(paste0("https://api.github.com/users/",user,"/followers?per_page=100;"),gtoken))
+  userData <- data.frame()
+  numOfUsers <- length(followerInfo)
+  
+  for(i in 1:numOfUsers)
+  {
+    userLogin <- followerInfo[[i]]$login
+    userInfo <- content(GET(paste0("https://api.github.com/users/",userLogin),gtoken))
+    
+    #If statement to remove outliers in the data
+    if((is.null(userInfo$followers)) || (is.null(userInfo$public_repos)) || (userInfo$following > 800) ||
+       (userInfo$followers > 800))
+    {
+      next
+    }
+    else 
+    {
+      currentUserData <- data.frame(followers = userInfo$followers, repos = userInfo$following )
+      userData <- rbind(userData, currentUserData)
+    }
+    
+  }
+  return(userData)
+}
+
+#Function to plot followers against following
+plotFollowersAgainstFollowing <- function(user)
+{
+  z <-getFollowersAndFollowing(user)
+  
+  p <- plot_ly(z,x =z$followers,y=z$following)%>%
+    layout(title = paste("Followers vs Following for", user,"'s Followers"),
+           xaxis = list(title="Followers"),
+           yaxis = list(title="Following"))
+  
+  return(p)
+}
+
+#Plot followers against following for phadej's followers
+phadejFollowersAgainstFollowing <- plotFollowersAgainstFollowing("phadej")
+chart_link8 = api_create(phadejFollowersAgainstFollowing , filename="phadejFollowersAgainstFollowing")
+chart_link8
+
+#Plot followers against following for mbostock's followers
+mbostockFollowersAgainstFollowing <- plotFollowersAgainstFollowing("mbostock")
+chart_link9 = api_create(mbostockFollowersAgainstFollowing , filename="mbostockFollowersAgainstFollowing")
+chart_link9
