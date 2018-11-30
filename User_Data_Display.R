@@ -160,6 +160,8 @@ visualizeCompanies <- function(user)
   return(p)
 }
 
+#These graphs appear to show the companies of the people interested in a particular user's work
+#i.e. the companies of the user's followers
 mbostockFollowerCompanies <- visualizeCompanies("mbostock")
 chart_link3 = api_create(mbostockFollowerCompanies, filename="mbostockFollowerCompanies")
 chart_link3
@@ -172,7 +174,54 @@ BcRikkoFollowerCompanies <- visualizeCompanies("BcRikko")
 chart_link5 = api_create(BcRikkoFollowerCompanies, filename="BcRikkoFollowerCompanies")
 chart_link5
 
+#Function to extract the number of followers and number of repositories of the followers of a particular user
+getFollowersAndRepos <- function(user)
+{
+  followerInfo <- content(GET(paste0("https://api.github.com/users/",user,"/followers?per_page=100;"),gtoken))
+  userData <- data.frame()
+  numOfUsers <- length(followerInfo)
+  
+  for(i in 1:numOfUsers)
+  {
+    userLogin <- followerInfo[[i]]$login
+    userInfo <- content(GET(paste0("https://api.github.com/users/",userLogin),gtoken))
+    
+    #If statement to remove outliers in the data or user with no followers or no repositories
+    if((is.null(userInfo$followers)) || (is.null(userInfo$public_repos))
+                                              || (userInfo$followers > 400 )|| (userInfo$public_repos > 200))
+    {
+      next
+    }
+    else 
+    {
+      currentUserData <- data.frame(followers = userInfo$followers, repos = userInfo$public_repos )
+      userData <- rbind(userData, currentUserData)
+    }
+    
+  }
+  
+  return(userData)
+}
 
 
+plotFollowersAgainstRepos <- function(user)
+{
+z <-getFollowersAndRepos(user)
 
+p <- plot_ly(z,x =z$followers,y=z$repos)%>%
+  layout(title = paste("No. of Followers vs No. of Repos for", user,"'s Followers"),
+         xaxis = list(title="No. of Followers"),
+         yaxis = list(title="No. of Repos"))
 
+return(p)
+}
+
+#Plot of no. of followers vs. no. of repo for phadej's followers
+phadejFollowersAgainstRepos <- plotFollowersAgainstRepos("phadej")
+chart_link6 = api_create(phadejFollowersAgainstRepos , filename="phadejFollowersAgainstRepos ")
+#chart_link6
+
+#Plot of no. of followers vs. no. of repo for mbostock's followers
+mbostockFollowersAgainstRepos <- plotFollowersAgainstRepos("mbostock")
+chart_link7 = api_create(mbostockFollowersAgainstRepos , filename="mbostockFollowersAgainstRepos ")
+#chart_link7
